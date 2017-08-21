@@ -59,7 +59,7 @@ public class Sender extends Thread {
 
 		try {
 			setStep(Step.RUNNING);
-			System.out.println("running..");
+			System.out.println("Sender is running..");
 			while (getStep() == Step.RUNNING) {
 				JSONObject data = dataSourceAdapter.getNextData();
 				if (data != null) {
@@ -80,7 +80,7 @@ public class Sender extends Thread {
 
 		try {
 			setStep(Step.RUNNING);
-			System.out.println("running..");
+			System.out.println("Sender is running..");
 
 			long interTime; // inter-arrival time, in nanoseconds
 			long sleepTime; // in milliseconds

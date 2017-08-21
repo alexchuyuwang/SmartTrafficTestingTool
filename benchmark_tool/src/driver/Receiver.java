@@ -33,7 +33,7 @@ public class Receiver extends Thread {
 	public void run() {
 
 		switch (mode) {
-		case "online":
+		case "feedback":
 			onLineRun();
 			break;
 		}
@@ -44,7 +44,7 @@ public class Receiver extends Thread {
 
 		try {
 			setStep(Step.RUNNING);
-			System.out.println("running..");
+			System.out.println("Receiver is running..");
 			while (getStep() == Step.RUNNING) {
 				JSONObject data = inputAdapter.getNextData();
 				if (data != null) {

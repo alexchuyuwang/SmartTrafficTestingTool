@@ -4,7 +4,6 @@ import java.util.LinkedList;
 import java.util.Queue;
 
 import org.eclipse.paho.client.mqttv3.*;
-import org.json.JSONArray;
 import org.json.JSONObject;
 
 public class MqttInputAdapter implements DataSourceAdapter, MqttCallback {
@@ -20,7 +19,7 @@ public class MqttInputAdapter implements DataSourceAdapter, MqttCallback {
 	public MqttInputAdapter(String broker, String topic) throws MqttException {
 		this.broker = broker;
 		this.topic = topic;
-		this.Client = new MqttClient(broker, MqttClient.generateClientId());
+		this.Client = new MqttClient(this.broker, MqttClient.generateClientId());
 	}
 
 	// disconnect

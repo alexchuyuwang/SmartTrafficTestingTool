@@ -44,7 +44,6 @@ public class KafkaInputAdapter implements DataSourceAdapter {
 	@Override
 	public void connect() throws Exception {
 		consumer.subscribe(topics);
-		System.out.println("kafka connected!");
 	}
 
 	@Override
