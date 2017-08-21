@@ -42,7 +42,7 @@ public class Sender extends Thread {
 	public void run() {
 
 		switch (mode) {
-		case "online":
+		case "feedback":
 			onLineRun();
 			break;
 		case "scheduled":

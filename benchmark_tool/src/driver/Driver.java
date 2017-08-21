@@ -8,16 +8,15 @@ import org.json.JSONObject;
 import adapters.DataSourceAdapter;
 import adapters.KafkaInputAdapter;
 import adapters.KafkaOutputAdapter;
+import adapters.MqttInputAdapter;
 import adapters.MqttOutputAdapter;
 import adapters.OutputAdapter;
 
 /**
  * 
- * Driver:
- * 1. Controlled by remote controller.
- * 2. Initial Sender Thread.
- * 3. Initial DataSourceAdapter to get data from other source.
- * 4. Initial OutputAdapter to send data to destination system.
+ * Driver: 1. Controlled by remote controller. 2. Initial Sender Thread. 3.
+ * Initial DataSourceAdapter to get data from other source. 4. Initial
+ * OutputAdapter to send data to destination system.
  * 
  * 
  * @author alex
@@ -28,7 +27,11 @@ public class Driver implements DriverRemoteFunctions {
 	private OutputAdapter outputAdapter;
 
 	private DataSourceAdapter dataSourceAdapter;
-	
+
+	private OutputAdapter feedbackAdapter;
+
+	private DataSourceAdapter inputAdapter;
+
 	private Scheduler scheduler;
 
 	private JSONObject driverConfig;
@@ -38,6 +41,8 @@ public class Driver implements DriverRemoteFunctions {
 	private String mode;
 
 	private Sender sender;
+
+	private Receiver receiver;
 
 	private boolean loaded = false;
 
@@ -49,10 +54,11 @@ public class Driver implements DriverRemoteFunctions {
 		/** Get configurations. */
 		this.name = driverConfig.getString("name");
 		this.mode = driverConfig.getString("mode");
+
+
 		String dataSourceAdapterType = driverConfig.getString("dataSourceAdapterType");
 		String outputAdapterType = driverConfig.getString("outputAdapterType");
 		JSONObject dataSourceConfig = driverConfig.getJSONObject("dataSourceConfig");
-		JSONObject timerConfig = driverConfig.getJSONObject("timerConfig");
 		JSONObject outputConfig = driverConfig.getJSONObject("outputConfig");
 
 		/**
@@ -69,7 +75,7 @@ public class Driver implements DriverRemoteFunctions {
 
 			break;
 		case "synthetic":
-			
+
 			break;
 		default:
 			return;
@@ -100,12 +106,52 @@ public class Driver implements DriverRemoteFunctions {
 		 */
 		switch (mode) {
 		case "scheduled":
-			Long duration=Long.parseLong(timerConfig.getString("duration"));
-			double rate=Double.parseDouble(timerConfig.getString("rate"));
-			String arrivalProcess=timerConfig.getString("arrivalProcess");
-			scheduler = new Scheduler(duration,rate,arrivalProcess);
+			JSONObject timerConfig = driverConfig.getJSONObject("timerConfig");
+			Long duration = Long.parseLong(timerConfig.getString("duration"));
+			double rate = Double.parseDouble(timerConfig.getString("rate"));
+			String arrivalProcess = timerConfig.getString("arrivalProcess");
+			scheduler = new Scheduler(duration, rate, arrivalProcess);
+			break;
+		case "feedback":
+			String feedbackAdapterType = driverConfig.getString("feedbackAdapterType");
+			String inputAdapterType = driverConfig.getString("inputAdapterType");
+			JSONObject feedbackConfig = driverConfig.getJSONObject("feedbackConfig");
+			JSONObject inputConfig = driverConfig.getJSONObject("inputConfig");
+			
+			/**
+			 * Different feedback adapter type with different configuration detail.
+			 */
+			switch (feedbackAdapterType) {
+			case "kafka":
+				String kafka_host = feedbackConfig.getString("kafkaBrokerHost");
+				String kafka_topic = feedbackConfig.getString("kafkaTopic");
+				feedbackAdapter = new KafkaOutputAdapter(kafka_host, kafka_topic);
+				break;
+			default:
+				return;
+
+			}
+
+			/**
+			 * Different input adapter type with different configuration detail.
+			 */
+			switch (inputAdapterType) {
+			case "mqtt":
+				String mqtt_host = inputConfig.getString("mqttBrokerHost");
+				String mqtt_topic = inputConfig.getString("mqttTopic");
+				inputAdapter = new MqttInputAdapter(mqtt_host, mqtt_topic);
+				break;
+			default:
+				return;
+
+			}
+			
+			/** Connect to adapters*/
+			feedbackAdapter.connect();
+			inputAdapter.connect();
 			break;
 		}
+	
 
 		/** Connect to adapters and set loaded. */
 		dataSourceAdapter.connect();
@@ -119,6 +165,9 @@ public class Driver implements DriverRemoteFunctions {
 
 		sender = new Sender(name, mode, outputAdapter, dataSourceAdapter, scheduler);
 		sender.start();
+
+		receiver = new Receiver(name, mode, feedbackAdapter, inputAdapter);
+		receiver.start();
 
 	}
 
