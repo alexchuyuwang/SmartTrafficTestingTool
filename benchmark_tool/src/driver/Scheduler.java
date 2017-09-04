@@ -33,7 +33,7 @@ public final class Scheduler {
 
 
     public Scheduler(Long duration, Double rate, String arrivalProcess) {
-        this.duration=duration;
+        this.duration=(long) (duration*1E9);
         this.rate=rate/ 1E9;
         this.arrivalProcess=arrivalProcess;
         this.rnd = new Random();
@@ -50,6 +50,7 @@ public final class Scheduler {
      * @return  The time in nanoseconds
      */
     public long getInterArrivalTime() {
+
         switch (this.arrivalProcess) {
         case "DETERMINISTIC":
             return this.getDeterministicInterArrivalTime();
@@ -93,4 +94,7 @@ public final class Scheduler {
         return this.rateFactor * (this.rate);
     }
 
+    public long getDuration() {
+        return this.duration;
+    }
 }

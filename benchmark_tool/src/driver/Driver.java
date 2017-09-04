@@ -5,6 +5,7 @@ import java.util.List;
 
 import org.json.JSONObject;
 
+import adapters.DataGenerator;
 import adapters.DataSourceAdapter;
 import adapters.KafkaInputAdapter;
 import adapters.KafkaOutputAdapter;
@@ -55,7 +56,6 @@ public class Driver implements DriverRemoteFunctions {
 		this.name = driverConfig.getString("name");
 		this.mode = driverConfig.getString("mode");
 
-
 		String dataSourceAdapterType = driverConfig.getString("dataSourceAdapterType");
 		String outputAdapterType = driverConfig.getString("outputAdapterType");
 		JSONObject dataSourceConfig = driverConfig.getJSONObject("dataSourceConfig");
@@ -75,7 +75,7 @@ public class Driver implements DriverRemoteFunctions {
 
 			break;
 		case "synthetic":
-
+			dataSourceAdapter = new DataGenerator(dataSourceConfig.getJSONObject("event"));
 			break;
 		default:
 			return;
@@ -100,7 +100,7 @@ public class Driver implements DriverRemoteFunctions {
 			return;
 
 		}
-		
+
 		/**
 		 * Different mode with different configuration detail.
 		 */
@@ -117,9 +117,10 @@ public class Driver implements DriverRemoteFunctions {
 			String inputAdapterType = driverConfig.getString("inputAdapterType");
 			JSONObject feedbackConfig = driverConfig.getJSONObject("feedbackConfig");
 			JSONObject inputConfig = driverConfig.getJSONObject("inputConfig");
-			
+
 			/**
-			 * Different feedback adapter type with different configuration detail.
+			 * Different feedback adapter type with different configuration
+			 * detail.
 			 */
 			switch (feedbackAdapterType) {
 			case "kafka":
@@ -145,13 +146,12 @@ public class Driver implements DriverRemoteFunctions {
 				return;
 
 			}
-			
-			/** Connect to adapters*/
+
+			/** Connect to adapters */
 			feedbackAdapter.connect();
 			inputAdapter.connect();
 			break;
 		}
-	
 
 		/** Connect to adapters and set loaded. */
 		dataSourceAdapter.connect();
@@ -165,10 +165,10 @@ public class Driver implements DriverRemoteFunctions {
 
 		sender = new Sender(name, mode, outputAdapter, dataSourceAdapter, scheduler);
 		sender.start();
-
-		receiver = new Receiver(name, mode, feedbackAdapter, inputAdapter);
-		receiver.start();
-
+		if (mode == "feedback") {
+			receiver = new Receiver(name, mode, feedbackAdapter, inputAdapter);
+			receiver.start();
+		}
 	}
 
 	@Override

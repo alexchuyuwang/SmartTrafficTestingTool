@@ -42,6 +42,7 @@ public class Sender extends Thread {
 	public void run() {
 
 		switch (mode) {
+		case "online":
 		case "feedback":
 			onLineRun();
 			break;
@@ -97,13 +98,17 @@ public class Sender extends Thread {
 				if (data != null) {
 					interTime = this.scheduler.getInterArrivalTime();
 					expectedElapsedTime += interTime;
+					if(expectedElapsedTime>this.scheduler.getDuration()){
+						setStep(Step.STOPPED);
+						break;
+					}
 					scheduledTime = firstTimestamp + expectedElapsedTime / SLEEP_TIME_RESOLUTION;
 					now = System.currentTimeMillis();
 					sleepTime = scheduledTime - now;
 					if (sleepTime > 0) {
 						Thread.sleep(sleepTime);
 					}
-					sendEvent(data.append("source", driverName));
+					sendEvent(data.put("source", driverName));
 				}
 			}
 			System.out.println("Stopped!");
