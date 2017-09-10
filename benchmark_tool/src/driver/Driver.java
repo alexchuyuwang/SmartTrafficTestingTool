@@ -41,6 +41,8 @@ public class Driver implements DriverRemoteFunctions {
 
 	private String mode;
 
+	private Double lossRate=0.0;
+	
 	private Sender sender;
 
 	private Receiver receiver;
@@ -101,6 +103,8 @@ public class Driver implements DriverRemoteFunctions {
 
 		}
 
+		lossRate=outputConfig.getDouble("lossRate");
+		
 		/**
 		 * Different mode with different configuration detail.
 		 */
@@ -163,7 +167,7 @@ public class Driver implements DriverRemoteFunctions {
 	@Override
 	public void start() {
 
-		sender = new Sender(name, mode, outputAdapter, dataSourceAdapter, scheduler);
+		sender = new Sender(name, mode, outputAdapter, dataSourceAdapter, scheduler,lossRate);
 		sender.start();
 		if (mode == "feedback") {
 			receiver = new Receiver(name, mode, feedbackAdapter, inputAdapter);

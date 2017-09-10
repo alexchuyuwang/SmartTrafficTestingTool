@@ -1,5 +1,7 @@
 package driver;
 
+import java.util.Random;
+
 import org.json.JSONObject;
 
 import adapters.DataSourceAdapter;
@@ -21,6 +23,10 @@ public class Sender extends Thread {
 
 	private String mode;
 
+	private double lossRate;
+	
+	private Random rnd;
+	
 	private Step step = Step.STOPPED;
 
 	/**
@@ -30,12 +36,15 @@ public class Sender extends Thread {
 	private static final long SLEEP_TIME_RESOLUTION = (long) 1E6;
 
 	public Sender(String driverName, String mode, OutputAdapter outputAdapter, DataSourceAdapter dataSourceAdapter,
-			Scheduler scheduler) {
+			Scheduler scheduler,Double lossRate) {
 		this.driverName = driverName;
 		this.mode = mode;
 		this.outputAdapter = outputAdapter;
 		this.dataSourceAdapter = dataSourceAdapter;
 		this.scheduler = scheduler;
+		
+		this.lossRate=lossRate;
+		rnd= new Random();
 	}
 
 	@Override
@@ -124,9 +133,19 @@ public class Sender extends Thread {
 	}
 
 	private void sendEvent(JSONObject event) throws Exception {
-		outputAdapter.send(event);
+		if(!eventLoss()){
+			outputAdapter.send(event);
+		}
 	}
 
+	private boolean eventLoss(){
+		if (this.rnd.nextDouble()<this.lossRate){
+			return true;
+		}else{
+			return false;
+		}
+	}
+	
 	public void stopLoad() {
 		setStep(Step.STOPPED);
 		// TODO
