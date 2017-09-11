@@ -38,7 +38,6 @@ public class MqttInputAdapter implements DataSourceAdapter, MqttCallback {
 		
 		JSONObject event = new JSONObject(new String(message.getPayload()));
 		events.offer(event);
-		System.out.println("event arrived:"+event);
 
 	}
 
@@ -62,7 +61,6 @@ public class MqttInputAdapter implements DataSourceAdapter, MqttCallback {
 
 	@Override
 	public JSONObject getNextData() throws Exception {
-		System.out.println("get event from:"+events);
 			return events.poll();
 	}
 
