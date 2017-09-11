@@ -169,7 +169,7 @@ public class Driver implements DriverRemoteFunctions {
 
 		sender = new Sender(name, mode, outputAdapter, dataSourceAdapter, scheduler,lossRate);
 		sender.start();
-		if (mode == "feedback") {
+		if (mode.equals("feedback")) {
 			receiver = new Receiver(name, mode, feedbackAdapter, inputAdapter);
 			receiver.start();
 		}

@@ -46,12 +46,14 @@ public class Receiver extends Thread {
 			setStep(Step.RUNNING);
 			System.out.println("Receiver is running..");
 			while (getStep() == Step.RUNNING) {
+				
 				JSONObject data = inputAdapter.getNextData();
 				if (data != null) {
+					
 					sendEvent(data.put("source", driverName));
-					//System.out.println(data);
+					
 				}
-
+				Thread.sleep(100);
 			}
 
 		} catch (Exception e) {

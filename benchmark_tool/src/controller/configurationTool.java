@@ -8,7 +8,7 @@ import org.json.JSONObject;
  * @author alex
  *
  */
-public class Main {
+public class configurationTool {
 
 	/** Facade instance to interact with lots of controller functions. */
 	static ControllerFacade facade;
